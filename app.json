@@ -27,6 +27,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": "Ever got caught in exam because your phone started ringing and you forgot to put it on silent.\nNo need to worry now"
   }
 }

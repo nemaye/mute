@@ -1,15 +1,19 @@
 import * as React from 'react';
-import MapView from 'react-native-maps';
-import { StyleSheet, Text, View, Dimensions, Button, Image } from 'react-native';
+import MapView, { Circle, Marker } from 'react-native-maps';
+import { StyleSheet, Text, View, Dimensions, Button, Image, TextInput } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import * as Locations from 'expo-location';
 
-const latitudeDelta = 0.0922;
-const longitudeDelta = 0.0421;
+const latitudeDelta = 0.0122;
+const longitudeDelta = 0.0121;
+const radius = 100;
 
 export default class App extends React.Component{
   state = {
     id: 0,
+    bool: false,
+    boolRadiusSet: false,
+    textInput: ''
   }
 
   _getLocation = async () => {
@@ -20,7 +24,6 @@ export default class App extends React.Component{
     }
     
     const location = await Locations.getCurrentPositionAsync();
-    // console.log(location.coords.latitude)
 
     this.setState({
       region: {
@@ -28,10 +31,12 @@ export default class App extends React.Component{
         longitude: location.coords.longitude,
         latitudeDelta: latitudeDelta,
         longitudeDelta: longitudeDelta,
+      },
+      currentLocation: {
+        lat: location.coords.latitude,
+        lon: location.coords.longitude,
       }
     })
-    console.log('fd',location.coords.longitude)
-
   }
 
   UNSAFE_componentWillMount(){
@@ -51,10 +56,19 @@ export default class App extends React.Component{
       id: this.state.id+1,
       lat: this.state.region.latitude,
       lon: this.state.region.longitude,
+      bool: true
     })
     console.log(this.state.region)
     console.log(this.state.lat,this.state.lon)
   }
+
+  handleRadius = () => {
+    this.setState({
+      bool: false,
+      boolRadiusSet: true
+    })
+  }
+
 render(){
   return (
     <View style={styles.container}>
@@ -63,17 +77,35 @@ render(){
           initialRegion={this.state.region}
           onRegionChangeComplete = {this.onChange}
         >
+          {this.state.bool && <Marker 
+            title='title'
+            description='desc'
+            coordinate={{latitude:this.state.lat ,longitude: this.state.lon}}
+          />}
+          {this.state.boolRadiusSet && <Circle
+            center={{latitude:this.state.lat, longitude: this.state.lon}}
+            radius={radius}
+          />}
         </MapView>
       </View>
       <View style={{top:'40%',position:'absolute'}}>
         <Image style={{height:20,width:20}} source={require('./pin.webp')}></Image>
       </View>
      <View style={styles.flextwo}>
-       <Button
+       {!this.state.bool && <Button
         title="DROP PIN"
         onPress={this.handleClick}
-       />
-       <Text>{this.state.id}</Text>
+       />}
+       {this.state.bool && <Button
+        title='radius'
+        onPress={this.handleRadius}
+       />}
+       {!this.state.bool && <Text>{this.state.id}</Text>}
+       {this.state.bool && <TextInput onChangeText={ input => {
+         this.setState({
+           textInput: input
+         })
+       }}/>}
      </View>
     </View>
   );
